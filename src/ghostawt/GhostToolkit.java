@@ -67,6 +67,8 @@ import java.net.URL;
 import java.util.Map;
 import java.util.Properties;
 
+import sun.awt.AWTAutoShutdown;
+
 /**
  * This is an AWT toolkit implementation which allows to run JDownloader without any graphical user interface. It does not throw a
  * {@link HeadlessException} like other headless implementations, it allows creation of all AWT components but does not actually do any
@@ -76,6 +78,15 @@ public class GhostToolkit extends Toolkit implements sun.awt.KeyboardFocusManage
     private static final sun.misc.SoftCache imgCache = new sun.misc.SoftCache();
 
     private GClipboard                      clipboard;
+
+    public GhostToolkit() {
+        /*
+         * Fix for 4701990.
+         * AWTAutoShutdown state must be changed before the toolkit thread
+         * starts to avoid race condition.
+         */
+        AWTAutoShutdown.notifyToolkitThreadBusy();
+    }
 
     @Override
     protected DesktopPeer createDesktopPeer(Desktop target) throws HeadlessException {
@@ -184,47 +195,56 @@ public class GhostToolkit extends Toolkit implements sun.awt.KeyboardFocusManage
 
     @Override
     protected FontPeer getFontPeer(String name, int style) {
+	Logger.log("GhostToolkit getFontPeer", name, style);
         return null;
     }
 
     @Override
     public Dimension getScreenSize() throws HeadlessException {
+	Logger.log("GhostToolkit getScreenSize");
         return new Dimension(1024, 768);
     }
 
     @Override
     public int getScreenResolution() throws HeadlessException {
+	Logger.log("GhostToolkit getScreenResolution");
         return 96;
     }
 
     @Override
     public ColorModel getColorModel() throws HeadlessException {
+	Logger.log("GhostToolkit getColorModel");
         return ColorModel.getRGBdefault();
     }
 
     @Override
     public String[] getFontList() {
+	Logger.log("GhostToolkit getFontList");
         String[] hardwiredFontList = { Font.DIALOG, Font.SANS_SERIF, Font.SERIF, Font.MONOSPACED, Font.DIALOG_INPUT };
         return hardwiredFontList;
     }
 
     @Override
     public FontMetrics getFontMetrics(Font font) {
+	Logger.log("GhostToolkit getFontMetrics", font);
         return sun.font.FontDesignMetrics.getMetrics(font);
     }
 
     @Override
     public void sync() {
+	Logger.log("GhostToolkit sync");
         // Nothing to do here.
     }
 
     @Override
     public Image getImage(String filename) {
+	Logger.log("GhostToolkit getImage", filename);
         return getImageFromHash(this, filename);
     }
 
     @Override
     public Image getImage(URL url) {
+	Logger.log("GhostToolkit getImage", url);
         return getImageFromHash(this, url);
     }
 
@@ -349,15 +369,16 @@ public class GhostToolkit extends Toolkit implements sun.awt.KeyboardFocusManage
 
     @Override
     public boolean isModalityTypeSupported(ModalityType modalityType) {
+	Logger.log("GhostToolkit isModalityTypeSupported", modalityType);
         return false;
     }
 
     @Override
     public boolean isModalExclusionTypeSupported(ModalExclusionType modalExclusionType) {
+	Logger.log("GhostToolkit isModalExclusionTypeSupported", modalExclusionType);
         return false;
     }
 
-    @Override
     public Map<TextAttribute, ?> mapInputMethodHighlight(InputMethodHighlight highlight) throws HeadlessException {
         return GInputMethod.mapInputMethodHighlight(highlight);
     }

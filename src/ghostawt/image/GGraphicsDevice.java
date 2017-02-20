@@ -11,26 +11,31 @@ public class GGraphicsDevice extends GraphicsDevice {
     
     
     public GGraphicsDevice() {
+	Logger.log("GGraphicsDevice");
         idString = "Display0";
     }
     
     @Override
     public int getType() {
+	Logger.log("GGraphicsDevice getType");
         return TYPE_RASTER_SCREEN;
     }
 
     @Override
     public String getIDstring() {
+	Logger.log("GGraphicsDevice getIDString");
         return idString;
     }
 
     @Override
     public GraphicsConfiguration[] getConfigurations() {
+	Logger.log("GGraphicsDevice getConfigurations");
         return new GraphicsConfiguration[]{getDefaultConfiguration()};
     }
 
     @Override
     public GraphicsConfiguration getDefaultConfiguration() {
+	Logger.log("GGraphicsDevice getDefaultConfiguration");
         if(defaultConfiguration == null) {
             defaultConfiguration = new GGraphicsConfiguration(this);
         }
@@ -38,6 +43,7 @@ public class GGraphicsDevice extends GraphicsDevice {
     }
 
     public ColorModel getColorModel() {
+	Logger.log("GGraphicsDevice getColorModel");
         if (colorModel == null)  {
             colorModel = ColorModel.getRGBdefault();
         }

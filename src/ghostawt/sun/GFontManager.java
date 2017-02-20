@@ -16,11 +16,13 @@ public class GFontManager extends sun.font.SunFontManager {
     private PhysicalFont _default;
 
     public GFontManager() {
-        System.out.println("Font Manager Created");
+	Logger.log("GFontManager");
     }
 
     @Override
     protected FontConfiguration createFontConfiguration() {
+	Logger.log("GFontManager.createFontConfiguration");
+
         FontConfiguration fc = new GFontConfiguration(this);
         fc.init();
         return fc;
@@ -33,16 +35,19 @@ public class GFontManager extends sun.font.SunFontManager {
 
     @Override
     public String[] getDefaultPlatformFont() {
+	Logger.log("GFontManager.getDefaultPlatformFont");
         return new String[] { "Lucida Sans Regular", "LucidaSansRegular.ttf" };
     }
 
     @Override
     protected String getFontPath(boolean noType1Fonts) {
+	Logger.log("GFontManager.getFontPath", noType1Fonts);
         return "";
     }
 
     @Override
     public synchronized PhysicalFont getDefaultPhysicalFont() {
+	Logger.log("GFontManager.getDefaultPhysicalFont");
         if (_default == null) {
             _default = (PhysicalFont) loadDefault();
         }
@@ -51,10 +56,13 @@ public class GFontManager extends sun.font.SunFontManager {
 
     @Override
     public synchronized Font2D findFont2D(String name, int style, int fallback) {
+	Logger.log("GFontManager.findFont2D", name, style, fallback);
         return getDefaultPhysicalFont();
     }
 
     private Font2D loadDefault() {
+	Logger.log("loadDefault");
+
         try {
             String[] defaultFont = getDefaultPlatformFont();
 
