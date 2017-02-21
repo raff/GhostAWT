@@ -72,7 +72,7 @@ public class GhostToolkit extends SunToolkit implements sun.awt.KeyboardFocusMan
     @Override
     public boolean isDesktopSupported() {
 	Logger.log("GhostToolkit isDesktopSupported");
-	return true;
+	return false;
     }
 
     @Override
@@ -258,12 +258,6 @@ public class GhostToolkit extends SunToolkit implements sun.awt.KeyboardFocusMan
         return null;
     }
 
-    //@Override
-    //public Dimension getScreenSize() throws HeadlessException {
-	//Logger.log("GhostToolkit getScreenSize");
-        //return new Dimension(1024, 768);
-    //}
-
     @Override
     public int getScreenResolution() throws HeadlessException {
 	Logger.log("GhostToolkit getScreenResolution");
@@ -315,6 +309,7 @@ public class GhostToolkit extends SunToolkit implements sun.awt.KeyboardFocusMan
                     img = tk.createImage(new sun.awt.image.FileImageSource(filename));
                     imgCache.put(filename, img);
                 } catch (Exception e) {
+		    Logger.log("getImageFromHash", e);
                 }
             }
             return img;
@@ -329,6 +324,7 @@ public class GhostToolkit extends SunToolkit implements sun.awt.KeyboardFocusMan
                     img = tk.createImage(new sun.awt.image.URLImageSource(url));
                     imgCache.put(url, img);
                 } catch (Exception e) {
+		    Logger.log("getImageFromHash", e);
                 }
             }
             return img;
@@ -481,7 +477,7 @@ public class GhostToolkit extends SunToolkit implements sun.awt.KeyboardFocusMan
 		while (true) {
 			Thread.sleep(5000);
 			Logger.log("GhostAWT Thread...");
-
+/*
 			if (ttarget != null) {
 				long when = System.currentTimeMillis();
 				int modifiers = 0;
@@ -492,6 +488,7 @@ public class GhostToolkit extends SunToolkit implements sun.awt.KeyboardFocusMan
                                           	when, modifiers));
 
 			}
+*/
 		}
         } catch (InterruptedException x) {
 		Logger.log("GhostAWT Thread interrupted!");
