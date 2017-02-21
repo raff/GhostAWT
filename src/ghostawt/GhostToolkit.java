@@ -425,7 +425,7 @@ public class GhostToolkit extends SunToolkit implements sun.awt.KeyboardFocusMan
     @Override
     public boolean isModalityTypeSupported(ModalityType modalityType) {
 	Logger.log("GhostToolkit isModalityTypeSupported", modalityType);
-        return false;
+        return true;
     }
 
     @Override
