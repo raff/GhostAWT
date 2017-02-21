@@ -1,83 +1,42 @@
 package ghostawt;
 
-import java.awt.Button;
-import java.awt.Canvas;
-import java.awt.Checkbox;
-import java.awt.CheckboxMenuItem;
-import java.awt.Choice;
-import java.awt.Desktop;
-import java.awt.Dialog;
-import java.awt.Dialog.ModalExclusionType;
-import java.awt.Dialog.ModalityType;
-import java.awt.Dimension;
-import java.awt.EventQueue;
-import java.awt.FileDialog;
-import java.awt.Font;
-import java.awt.FontMetrics;
-import java.awt.Frame;
-import java.awt.HeadlessException;
-import java.awt.Image;
-import java.awt.Label;
-import java.awt.List;
-import java.awt.Menu;
-import java.awt.MenuBar;
-import java.awt.MenuItem;
-import java.awt.Panel;
-import java.awt.PopupMenu;
-import java.awt.PrintJob;
-import java.awt.ScrollPane;
-import java.awt.Scrollbar;
-import java.awt.TextArea;
-import java.awt.TextField;
-import java.awt.Toolkit;
-import java.awt.Window;
+import java.awt.*;
+import java.awt.Dialog.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.dnd.DragGestureEvent;
 import java.awt.dnd.InvalidDnDOperationException;
 import java.awt.dnd.peer.DragSourceContextPeer;
+import java.awt.event.ActionEvent;
 import java.awt.font.TextAttribute;
 import java.awt.im.InputMethodHighlight;
+import java.awt.im.spi.InputMethodDescriptor;
 import java.awt.image.ColorModel;
 import java.awt.image.ImageObserver;
 import java.awt.image.ImageProducer;
-import java.awt.peer.ButtonPeer;
-import java.awt.peer.CanvasPeer;
-import java.awt.peer.CheckboxMenuItemPeer;
-import java.awt.peer.CheckboxPeer;
-import java.awt.peer.ChoicePeer;
-import java.awt.peer.DesktopPeer;
-import java.awt.peer.DialogPeer;
-import java.awt.peer.FileDialogPeer;
-import java.awt.peer.FontPeer;
-import java.awt.peer.FramePeer;
-import java.awt.peer.LabelPeer;
-import java.awt.peer.ListPeer;
-import java.awt.peer.MenuBarPeer;
-import java.awt.peer.MenuItemPeer;
-import java.awt.peer.MenuPeer;
-import java.awt.peer.MouseInfoPeer;
-import java.awt.peer.PanelPeer;
-import java.awt.peer.PopupMenuPeer;
-import java.awt.peer.ScrollPanePeer;
-import java.awt.peer.ScrollbarPeer;
-import java.awt.peer.TextAreaPeer;
-import java.awt.peer.TextFieldPeer;
-import java.awt.peer.WindowPeer;
+import java.awt.peer.*;
 import java.net.URL;
 import java.util.Map;
 import java.util.Properties;
 
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+
+import sun.awt.SunToolkit;
 import sun.awt.AWTAutoShutdown;
+import sun.misc.ThreadGroupUtils;
 
 /**
  * This is an AWT toolkit implementation which allows to run JDownloader without any graphical user interface. It does not throw a
  * {@link HeadlessException} like other headless implementations, it allows creation of all AWT components but does not actually do any
  * visuals.
  */
-public class GhostToolkit extends Toolkit implements sun.awt.KeyboardFocusManagerPeerProvider {
+public class GhostToolkit extends SunToolkit implements sun.awt.KeyboardFocusManagerPeerProvider, Runnable {
     private static final sun.misc.SoftCache imgCache = new sun.misc.SoftCache();
 
-    private GClipboard                      clipboard;
+    private GClipboard clipboard;
+    private boolean    inited;
+
+    private Button ttarget;
 
     public GhostToolkit() {
         /*
@@ -86,15 +45,115 @@ public class GhostToolkit extends Toolkit implements sun.awt.KeyboardFocusManage
          * starts to avoid race condition.
          */
         AWTAutoShutdown.notifyToolkitThreadBusy();
+
+        // Find a root TG and attach Appkit thread to it
+        ThreadGroup rootTG = AccessController.doPrivileged(new PrivilegedAction<ThreadGroup>() {
+                    @Override
+                    public ThreadGroup run() {
+                        return ThreadGroupUtils.getRootThreadGroup();
+                    }
+                });
+
+        Thread toolkitThread = new Thread(rootTG, this, "AWT-GhostAWT");
+        toolkitThread.setDaemon(true);
+        toolkitThread.start();
+
+        try {
+            synchronized(this) {
+                while(!inited) {
+                    wait();
+                }
+            }
+        } catch (InterruptedException x) {
+            // swallow the exception
+        }
     }
 
     @Override
-    protected DesktopPeer createDesktopPeer(Desktop target) throws HeadlessException {
+    public boolean isDesktopSupported() {
+	Logger.log("GhostToolkit isDesktopSupported");
+	return true;
+    }
+
+    @Override
+    public boolean isTraySupported() {
+	Logger.log("GhostToolkit isTraySupported");
+	return false;
+    }
+
+    @Override
+    protected int getScreenWidth() {
+	Logger.log("GhostToolkit getScreenWidth");
+	return 1024;
+    }
+
+    @Override
+    protected int getScreenHeight() {
+	Logger.log("GhostToolkit getScreenHeight");
+	return 768;
+    }
+
+    @Override
+    public void grab(Window w) {
+	Logger.log("GhostToolkit grab", w);
+
+	/*
+        if (w.getPeer() != null) {
+            ((GWindowPeer)w.getPeer()).grab();
+        }
+	*/
+    }
+
+    @Override
+    public void ungrab(Window w) {
+	Logger.log("GhostToolkit ungrab", w);
+
+	/*
+        if (w.getPeer() != null) {
+           ((GWindowPeer)w.getPeer()).ungrab();
+        }
+	*/
+    }
+
+    @Override
+    protected boolean syncNativeQueue(long timeout) {
+	Logger.log("GhostToolkit syncNativeQueue", timeout);
+
+	try {
+		Thread.sleep(timeout);
+	} catch (InterruptedException e) {
+		Logger.log("GhostToolkit syncNativeQueue interrupted");
+        }
+
+	return false;
+    }
+
+    @Override
+    public RobotPeer createRobot(Robot target, GraphicsDevice screen) throws AWTException {
+	return new GRobotPeer();
+    }
+
+
+    @Override
+    public DesktopPeer createDesktopPeer(Desktop target) throws HeadlessException {
         return new GDesktopPeer();
     }
 
     @Override
-    protected ButtonPeer createButton(Button target) throws HeadlessException {
+    public SystemTrayPeer createSystemTray(SystemTray target) throws HeadlessException {
+	Logger.log("GhostToolkit createSystemTray", target);
+	throw new HeadlessException();
+    }
+
+    @Override
+    public TrayIconPeer createTrayIcon(TrayIcon target) throws HeadlessException {
+	Logger.log("GhostToolkit createTrayIcon", target);
+	throw new HeadlessException();
+    }
+
+    @Override
+    public ButtonPeer createButton(Button target) throws HeadlessException {
+	ttarget = target;
         return new GButtonPeer(target);
     }
 
@@ -104,106 +163,106 @@ public class GhostToolkit extends Toolkit implements sun.awt.KeyboardFocusManage
     }
 
     @Override
-    protected LabelPeer createLabel(Label target) throws HeadlessException {
+    public LabelPeer createLabel(Label target) throws HeadlessException {
         return new GLabelPeer(target);
     }
 
     @Override
-    protected ListPeer createList(List target) throws HeadlessException {
+    public ListPeer createList(List target) throws HeadlessException {
         return new GListPeer(target);
     }
 
     @Override
-    protected CheckboxPeer createCheckbox(Checkbox target) throws HeadlessException {
+    public CheckboxPeer createCheckbox(Checkbox target) throws HeadlessException {
         return new GCheckboxPeer(target);
     }
 
     @Override
-    protected ScrollbarPeer createScrollbar(Scrollbar target) throws HeadlessException {
+    public ScrollbarPeer createScrollbar(Scrollbar target) throws HeadlessException {
         return new GScrollbarPeer(target);
     }
 
     @Override
-    protected ScrollPanePeer createScrollPane(ScrollPane target) throws HeadlessException {
+    public ScrollPanePeer createScrollPane(ScrollPane target) throws HeadlessException {
         return new GScrollPanePeer(target);
     }
 
     @Override
-    protected TextAreaPeer createTextArea(TextArea target) throws HeadlessException {
+    public TextAreaPeer createTextArea(TextArea target) throws HeadlessException {
         return new GTextAreaPeer(target);
     }
 
     @Override
-    protected ChoicePeer createChoice(Choice target) throws HeadlessException {
+    public ChoicePeer createChoice(Choice target) throws HeadlessException {
         return new GChoicePeer(target);
     }
 
     @Override
-    protected FramePeer createFrame(Frame target) throws HeadlessException {
+    public FramePeer createFrame(Frame target) throws HeadlessException {
         return new GFramePeer(target);
     }
 
     @Override
-    protected CanvasPeer createCanvas(Canvas target) {
+    public CanvasPeer createCanvas(Canvas target) {
         return new GCanvasPeer(target);
     }
 
     @Override
-    protected PanelPeer createPanel(Panel target) {
+    public PanelPeer createPanel(Panel target) {
         return new GPanelPeer(target);
     }
 
     @Override
-    protected WindowPeer createWindow(Window target) throws HeadlessException {
+    public WindowPeer createWindow(Window target) throws HeadlessException {
         return new GWindowPeer(target);
     }
 
     @Override
-    protected DialogPeer createDialog(Dialog target) throws HeadlessException {
+    public DialogPeer createDialog(Dialog target) throws HeadlessException {
         return new GDialogPeer(target);
     }
 
     @Override
-    protected MenuBarPeer createMenuBar(MenuBar target) throws HeadlessException {
+    public MenuBarPeer createMenuBar(MenuBar target) throws HeadlessException {
         return new GMenuBarPeer(target);
     }
 
     @Override
-    protected MenuPeer createMenu(Menu target) throws HeadlessException {
+    public MenuPeer createMenu(Menu target) throws HeadlessException {
         return new GMenuPeer(target);
     }
 
     @Override
-    protected PopupMenuPeer createPopupMenu(PopupMenu target) throws HeadlessException {
+    public PopupMenuPeer createPopupMenu(PopupMenu target) throws HeadlessException {
         return new GPopupMenuPeer(target);
     }
 
     @Override
-    protected MenuItemPeer createMenuItem(MenuItem target) throws HeadlessException {
+    public MenuItemPeer createMenuItem(MenuItem target) throws HeadlessException {
         return new GMenuItemPeer(target);
     }
 
     @Override
-    protected FileDialogPeer createFileDialog(FileDialog target) throws HeadlessException {
+    public FileDialogPeer createFileDialog(FileDialog target) throws HeadlessException {
         return new GFileDialogPeer(target);
     }
 
     @Override
-    protected CheckboxMenuItemPeer createCheckboxMenuItem(CheckboxMenuItem target) throws HeadlessException {
+    public CheckboxMenuItemPeer createCheckboxMenuItem(CheckboxMenuItem target) throws HeadlessException {
         return new GCheckboxMenuItemPeer(target);
     }
 
     @Override
-    protected FontPeer getFontPeer(String name, int style) {
+    public FontPeer getFontPeer(String name, int style) {
 	Logger.log("GhostToolkit getFontPeer", name, style);
         return null;
     }
 
-    @Override
-    public Dimension getScreenSize() throws HeadlessException {
-	Logger.log("GhostToolkit getScreenSize");
-        return new Dimension(1024, 768);
-    }
+    //@Override
+    //public Dimension getScreenSize() throws HeadlessException {
+	//Logger.log("GhostToolkit getScreenSize");
+        //return new Dimension(1024, 768);
+    //}
 
     @Override
     public int getScreenResolution() throws HeadlessException {
@@ -384,6 +443,13 @@ public class GhostToolkit extends Toolkit implements sun.awt.KeyboardFocusManage
     }
 
     @Override
+    public InputMethodDescriptor getInputMethodAdapterDescriptor()
+        throws AWTException
+    {
+        return (InputMethodDescriptor)null;
+    }
+
+    @Override
     public java.awt.peer.KeyboardFocusManagerPeer getKeyboardFocusManagerPeer() {
         return new GKeyboardFocusManagerPeer();
     }
@@ -391,5 +457,44 @@ public class GhostToolkit extends Toolkit implements sun.awt.KeyboardFocusManage
     @Override
     protected MouseInfoPeer getMouseInfoPeer() {
         return new GMouseInfoPeer();
+    }
+
+    //
+    // this thread executes the headless script and generates the appropriate events
+    //
+    public void run() {
+        AccessController.doPrivileged(new PrivilegedAction<Void>() {
+            @Override
+            public Void run() {
+                Thread.currentThread().setContextClassLoader(null);
+                return null;
+            }
+        });
+        Thread.currentThread().setPriority(Thread.NORM_PRIORITY + 1);
+
+        synchronized(this) {
+            inited = true;
+            notifyAll();
+        }
+
+	try {
+		while (true) {
+			Thread.sleep(5000);
+			Logger.log("GhostAWT Thread...");
+
+			if (ttarget != null) {
+				long when = System.currentTimeMillis();
+				int modifiers = 0;
+
+                		GhostToolkit.postEvent(GhostToolkit.targetToAppContext(ttarget),
+						new ActionEvent(ttarget, ActionEvent.ACTION_PERFORMED,
+                                          	((Button)ttarget).getActionCommand(),
+                                          	when, modifiers));
+
+			}
+		}
+        } catch (InterruptedException x) {
+		Logger.log("GhostAWT Thread interrupted!");
+	}
     }
 }
