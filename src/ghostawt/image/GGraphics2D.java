@@ -31,74 +31,91 @@ public class GGraphics2D extends Graphics2D {
     private GraphicsConfiguration _configuration;
 
     public GGraphics2D(GraphicsConfiguration configuration) {
+	Logger.log("GGraphics2D", configuration);
         _configuration = configuration;
     }
 
     @Override
     public void draw(Shape s) {
+	Logger.log("GGraphics2D draw", s);
     }
 
     @Override
     public boolean drawImage(Image img, AffineTransform xform, ImageObserver obs) {
+	Logger.log("GGraphics2D drawImage", img, xform, obs);
         return false;
     }
 
     @Override
     public void drawImage(BufferedImage img, BufferedImageOp op, int x, int y) {
+	Logger.log("GGraphics2D drawImage", img, op, x, y);
     }
 
     @Override
     public void drawRenderedImage(RenderedImage img, AffineTransform xform) {
+	Logger.log("GGraphics2D drawRenderedImage", img, xform);
     }
 
     @Override
     public void drawRenderableImage(RenderableImage img, AffineTransform xform) {
+	Logger.log("GGraphics2D drawRenderableImage", img, xform);
     }
 
     @Override
     public void drawString(String str, int x, int y) {
+	Logger.log("GGraphics2D drawString", str, x, y);
     }
 
     @Override
     public void drawString(String str, float x, float y) {
+	Logger.log("GGraphics2D drawString", str, x, y);
     }
 
     @Override
     public void drawString(AttributedCharacterIterator iterator, int x, int y) {
+	Logger.log("GGraphics2D drawString", iterator, x, y);
     }
 
     @Override
     public void drawString(AttributedCharacterIterator iterator, float x, float y) {
+	Logger.log("GGraphics2D drawString", iterator, x, y);
     }
 
     @Override
     public void drawGlyphVector(GlyphVector g, float x, float y) {
+	Logger.log("GGraphics2D drawGlyphVecotr", g, x, y);
     }
 
     @Override
     public void fill(Shape s) {
+	Logger.log("GGraphics2D fill", s);
     }
 
     @Override
     public boolean hit(Rectangle rect, Shape s, boolean onStroke) {
+	Logger.log("GGraphics2D hit", rect, s, onStroke);
         return false;
     }
 
     @Override
     public GraphicsConfiguration getDeviceConfiguration() {
+	Logger.log("GGraphics2D getDeviceConfiguration");
         return _configuration;
     }
 
     @Override
     public void setComposite(Composite comp) {
+	Logger.log("GGraphics2D setComposite", comp);
     }
 
     @Override
     public void setPaint(Paint paint) {
+	Logger.log("GGraphics2D setPaint", paint);
     }
 
     @Override
     public void setStroke(Stroke s) {
+	Logger.log("GGraphics2D setStroke", s);
     }
 
     @Override
@@ -190,11 +207,13 @@ public class GGraphics2D extends Graphics2D {
 
     @Override
     public FontRenderContext getFontRenderContext() {
+	Logger.log("GGraphics2D getFontRenderContext");
         return new FontRenderContext(new AffineTransform(), false, false);
     }
 
     @Override
     public Graphics create() {
+	Logger.log("GGraphics2D create");
         return new GGraphics2D(_configuration);
     }
 
@@ -217,15 +236,18 @@ public class GGraphics2D extends Graphics2D {
 
     @Override
     public Font getFont() {
+	Logger.log("GGraphics2D getFont");
         return new Font(Font.DIALOG, Font.PLAIN, 12);
     }
 
     @Override
     public void setFont(Font font) {
+	Logger.log("GGraphics2D setFont", font);
     }
 
     @Override
     public FontMetrics getFontMetrics(Font f) {
+	Logger.log("GGraphics2D getFontMetrics", f);
         return new GFontMetrics(f);
     }
 
@@ -335,6 +357,7 @@ public class GGraphics2D extends Graphics2D {
 
     @Override
     public void dispose() {
+	Logger.log("GGraphics2D dispose");
     }
 
 }
