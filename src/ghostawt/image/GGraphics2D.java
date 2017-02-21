@@ -30,6 +30,11 @@ import java.util.Map;
 public class GGraphics2D extends Graphics2D {
     private GraphicsConfiguration _configuration;
 
+    private Color foreground = Color.black;
+    private Color background = Color.white;
+    private Paint paint = Color.black;
+    private Font font = new Font(Font.DIALOG, Font.PLAIN, 12);
+
     public GGraphics2D(GraphicsConfiguration configuration) {
 	Logger.log("GGraphics2D", configuration);
         _configuration = configuration;
@@ -109,8 +114,9 @@ public class GGraphics2D extends Graphics2D {
     }
 
     @Override
-    public void setPaint(Paint paint) {
-	Logger.log("GGraphics2D setPaint", paint);
+    public void setPaint(Paint p) {
+	Logger.log("GGraphics2D setPaint", p);
+        paint = p;
     }
 
     @Override
@@ -179,7 +185,7 @@ public class GGraphics2D extends Graphics2D {
 
     @Override
     public Paint getPaint() {
-        return Color.black;
+        return paint;
     }
 
     @Override
@@ -189,11 +195,12 @@ public class GGraphics2D extends Graphics2D {
 
     @Override
     public void setBackground(Color color) {
+	background = color;
     }
 
     @Override
     public Color getBackground() {
-        return Color.white;
+        return background;
     }
 
     @Override
@@ -219,11 +226,12 @@ public class GGraphics2D extends Graphics2D {
 
     @Override
     public Color getColor() {
-        return Color.black;
+        return foreground;
     }
 
     @Override
     public void setColor(Color c) {
+        foreground = c;
     }
 
     @Override
@@ -237,12 +245,13 @@ public class GGraphics2D extends Graphics2D {
     @Override
     public Font getFont() {
 	Logger.log("GGraphics2D getFont");
-        return new Font(Font.DIALOG, Font.PLAIN, 12);
+        return font;
     }
 
     @Override
-    public void setFont(Font font) {
-	Logger.log("GGraphics2D setFont", font);
+    public void setFont(Font f) {
+	Logger.log("GGraphics2D setFont", f);
+	font = f;
     }
 
     @Override
