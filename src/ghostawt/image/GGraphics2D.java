@@ -26,6 +26,7 @@ import java.awt.image.RenderedImage;
 import java.awt.image.renderable.RenderableImage;
 import java.text.AttributedCharacterIterator;
 import java.util.Map;
+import java.util.HashMap;
 
 public class GGraphics2D extends Graphics2D {
     private GraphicsConfiguration _configuration;
@@ -34,10 +35,14 @@ public class GGraphics2D extends Graphics2D {
     private Color background = Color.white;
     private Paint paint = Color.black;
     private Font font = new Font(Font.DIALOG, Font.PLAIN, 12);
+    private Rectangle clipBounds;
+
+    private RenderingHints renderingHints;
 
     public GGraphics2D(GraphicsConfiguration configuration) {
 	Logger.log("GGraphics2D", configuration);
         _configuration = configuration;
+	renderingHints = new RenderingHints(new HashMap<Key, Object>());
     }
 
     @Override
@@ -126,90 +131,114 @@ public class GGraphics2D extends Graphics2D {
 
     @Override
     public void setRenderingHint(Key hintKey, Object hintValue) {
+	Logger.log("GGraphics2D setRenderingHint", hintKey, hintValue);
+	renderingHints.put(hintKey, hintValue);
     }
 
     @Override
     public Object getRenderingHint(Key hintKey) {
-        return null;
+	Logger.log("GGraphics2D getRenderingHint");
+        return renderingHints.get(hintKey);
     }
 
     @Override
     public void setRenderingHints(Map<?, ?> hints) {
+	Logger.log("GGraphics2D setRenderingHints", hints);
+	renderingHints.clear();
+	renderingHints.putAll(hints);
     }
 
     @Override
     public void addRenderingHints(Map<?, ?> hints) {
+	Logger.log("GGraphics2D addRenderingHints", hints);
+	renderingHints.putAll(hints);
     }
 
     @Override
     public RenderingHints getRenderingHints() {
-        return null;
+	Logger.log("GGraphics2D getRenderingHints");
+        return renderingHints;
     }
 
     @Override
     public void translate(int x, int y) {
+	Logger.log("GGraphics2D translate", x, y);
     }
 
     @Override
     public void translate(double tx, double ty) {
+	Logger.log("GGraphics2D translate", tx, ty);
     }
 
     @Override
     public void rotate(double theta) {
+	Logger.log("GGraphics2D rotate", theta);
     }
 
     @Override
     public void rotate(double theta, double x, double y) {
+	Logger.log("GGraphics2D rotate", theta, x, y);
     }
 
     @Override
     public void scale(double sx, double sy) {
+	Logger.log("GGraphics2D scale", sx, sy);
     }
 
     @Override
     public void shear(double shx, double shy) {
+	Logger.log("GGraphics2D scale", shx, shy);
     }
 
     @Override
     public void transform(AffineTransform Tx) {
+	Logger.log("GGraphics2D transform", Tx);
     }
 
     @Override
     public void setTransform(AffineTransform Tx) {
+	Logger.log("GGraphics2D setTransform", Tx);
     }
 
     @Override
     public AffineTransform getTransform() {
+	Logger.log("GGraphics2D getTransform");
         return new AffineTransform();
     }
 
     @Override
     public Paint getPaint() {
+	Logger.log("GGraphics2D getPaint");
         return paint;
     }
 
     @Override
     public Composite getComposite() {
+	Logger.log("GGraphics2D getComposite");
         return AlphaComposite.SrcOver;
     }
 
     @Override
     public void setBackground(Color color) {
+	Logger.log("GGraphics2D setBackground", color);
 	background = color;
     }
 
     @Override
     public Color getBackground() {
+	Logger.log("GGraphics2D getBackground");
         return background;
     }
 
     @Override
     public Stroke getStroke() {
+	Logger.log("GGraphics2D getStroke");
         return new BasicStroke();
     }
 
     @Override
     public void clip(Shape s) {
+	Logger.log("GGraphics2D clip", s);
     }
 
     @Override
@@ -220,26 +249,31 @@ public class GGraphics2D extends Graphics2D {
 
     @Override
     public Graphics create() {
-	Logger.log("GGraphics2D create");
-        return new GGraphics2D(_configuration);
+        Graphics g = new GGraphics2D(_configuration);
+	Logger.log("GGraphics2D create", g);
+	return g;
     }
 
     @Override
     public Color getColor() {
+	Logger.log("GGraphics2D getColor");
         return foreground;
     }
 
     @Override
     public void setColor(Color c) {
+	Logger.log("GGraphics2D setColor", c);
         foreground = c;
     }
 
     @Override
     public void setPaintMode() {
+	Logger.log("GGraphics2D setPaintMode");
     }
 
     @Override
     public void setXORMode(Color c1) {
+	Logger.log("GGraphics2D setXORMode", c1);
     }
 
     @Override
@@ -262,24 +296,36 @@ public class GGraphics2D extends Graphics2D {
 
     @Override
     public Rectangle getClipBounds() {
-        return null;
+	Logger.log("GGraphics2D getClipBounds", clipBounds);
+        return clipBounds;
     }
 
     @Override
     public void clipRect(int x, int y, int width, int height) {
+	Logger.log("GGraphics2D clipRect", x, y, width, height);
+	clipBounds = new Rectangle(x, y, width, height);
     }
 
     @Override
     public void setClip(int x, int y, int width, int height) {
+	Logger.log("GGraphics2D setClip", x, y, width, height);
+	clipBounds = new Rectangle(x, y, width, height);
     }
 
     @Override
     public Shape getClip() {
+	Logger.log("GGraphics2D getClip");
         return null;
     }
 
     @Override
     public void setClip(Shape clip) {
+	Logger.log("GGraphics2D setClip", clip);
+	if (clip == null) {
+		clipBounds = null;
+	} else {
+		clipBounds = clip.getBounds();
+	}
     }
 
     @Override
@@ -366,7 +412,7 @@ public class GGraphics2D extends Graphics2D {
 
     @Override
     public void dispose() {
-	Logger.log("GGraphics2D dispose");
+	Logger.log("GGraphics2D dispose", this);
     }
 
 }
