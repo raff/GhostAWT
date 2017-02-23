@@ -1,22 +1,28 @@
 package ghostawt;
 
+import ghostawt.image.GhostGraphicsEnvironment;
+
 import java.awt.AWTEvent;
 import java.awt.AWTException;
 import java.awt.BufferCapabilities;
 import java.awt.BufferCapabilities.FlipContents;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.GraphicsConfiguration;
+import java.awt.GraphicsEnvironment;
 import java.awt.Image;
 import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.dnd.DropTarget;
 import java.awt.dnd.peer.DropTargetPeer;
+import java.awt.event.ComponentEvent;
 import java.awt.event.PaintEvent;
+import java.awt.event.WindowEvent;
 import java.awt.image.ColorModel;
 import java.awt.image.ImageObserver;
 import java.awt.image.ImageProducer;
@@ -29,251 +35,331 @@ import sun.awt.image.SunVolatileImage;
 import sun.awt.image.ToolkitImage;
 import sun.java2d.pipe.Region;
 
+import javax.accessibility.AccessibleContext;
+
 public class GComponentPeer extends GObjectPeer implements ComponentPeer, DropTargetPeer {
+    private String name;
+    private Graphics graphics;
+
     public GComponentPeer(Component target) {
         super(target);
+
 	Logger.log("GComponentPeer", target);
+	name = target.getName();
     }
 
     @Override
     public void dispose() {
-	Logger.log("GComponentPeer dispose");
+	Logger.log("GComponentPeer", name, "dispose");
     }
 
     @Override
     public void addDropTarget(DropTarget dt) {
-	Logger.log("GComponentPeer addDropTarget", dt);
+	Logger.log("GComponentPeer", name, "addDropTarget", dt);
     }
 
     @Override
     public void removeDropTarget(DropTarget dt) {
-	Logger.log("GComponentPeer removeDropTarget", dt);
+	Logger.log("GComponentPeer", name, "removeDropTarget", dt);
     }
 
     @Override
     public boolean isObscured() {
         // false because canDetermineObscurity indicates we do not support this
-	Logger.log("GComponentPeer isObscured");
+	Logger.log("GComponentPeer", name, "isObscured");
         return false;
     }
 
     @Override
     public boolean canDetermineObscurity() {
-	Logger.log("GComponentPeer canDetermineObscurity");
+	Logger.log("GComponentPeer", name, "canDetermineObscurity");
         return false;
     }
 
     @Override
     public void setVisible(boolean v) {
-	Logger.log("GComponentPeer setVisible", v);
+	Logger.log("GComponentPeer", name, "setVisible", v);
         // nothing to do
     }
 
     @Override
     public void setEnabled(boolean e) {
-	Logger.log("GComponentPeer setEnabled", e);
+	Logger.log("GComponentPeer", name, "setEnabled", e);
         // nothing to do
     }
 
     @Override
     public void paint(Graphics g) {
-	Logger.log("GComponentPeer paint");
+	Logger.log("GComponentPeer", name, "paint");
     }
 
     @Override
     public void print(Graphics g) {
-	Logger.log("GComponentPeer print");
+	Logger.log("GComponentPeer", name, "print");
         // nothing to do
     }
 
     @Override
     public void setBounds(int x, int y, int width, int height, int op) {
-	Logger.log("GComponentPeer setBounds", x, y, width, height);
+	Logger.log("GComponentPeer", name, "setBounds", x, y, width, height);
         // nothing to do
     }
 
     @Override
     public void handleEvent(AWTEvent e) {
-	Logger.log("GComponentPeer handleEvent", e);
-        // nothing to do
+	Logger.log("GComponentPeer", name, "handleEvent", e);
+
+	if (e.getID() == WindowEvent.WINDOW_OPENED) {
+		Component c = ((ComponentEvent)e).getComponent();
+
+		printComponent(c, "");
+		// Logger.log("  component", c);
+		// printAccessibleContext(c.getAccessibleContext(), "");
+	}
     }
 
     @Override
     public void coalescePaintEvent(PaintEvent e) {
-	Logger.log("GComponentPeer coaleshePaintEvent");
+	Logger.log("GComponentPeer", name, "coaleshePaintEvent");
         // nothing to do
     }
 
     @Override
     public Point getLocationOnScreen() {
-	Logger.log("GComponentPeer getLocationOnScreen");
+	Logger.log("GComponentPeer", name, "getLocationOnScreen");
         return new Point();
     }
 
     @Override
     public Dimension getPreferredSize() {
-	Logger.log("GComponentPeer getPreferredSize");
+	Logger.log("GComponentPeer", name, "getPreferredSize");
         return getMinimumSize();
     }
 
     @Override
     public Dimension getMinimumSize() {
-	Logger.log("GComponentPeer getSize");
+	Logger.log("GComponentPeer", name, "getSize");
         return ((Component) target).getSize();
     }
 
     @Override
     public ColorModel getColorModel() {
-	Logger.log("GComponentPeer getColorModel");
+	Logger.log("GComponentPeer", name, "getColorModel");
         return null;
     }
 
     @Override
     public Toolkit getToolkit() {
-	Logger.log("GComponentPeer getToolkit");
+	Logger.log("GComponentPeer", name, "getToolkit");
         return Toolkit.getDefaultToolkit();
     }
 
     @Override
     public Graphics getGraphics() {
-	Logger.log("GComponentPeer getGraphics");
-        return null;
+	Logger.log("GComponentPeer", name, "getGraphics" );
+	if (graphics == null) {
+		GhostGraphicsEnvironment ge = (GhostGraphicsEnvironment) GraphicsEnvironment.getLocalGraphicsEnvironment();
+		graphics = ge.createGraphics(null);
+	}
+        return graphics;
     }
 
     protected void disposeImpl() {
-	Logger.log("GComponentPeer disposeImpl");
+	Logger.log("GComponentPeer", name, "disposeImpl");
     }
 
     @Override
     public FontMetrics getFontMetrics(Font font) {
-	Logger.log("GComponentPeer getFontMetrics", font);
+	Logger.log("GComponentPeer", name, "getFontMetrics", font);
         return getToolkit().getFontMetrics(font);
     }
 
     @Override
     public synchronized void setForeground(Color c) {
-	Logger.log("GComponentPeer setForeground", c);
+	Logger.log("GComponentPeer", name, "setForeground", c);
     }
 
     @Override
     public synchronized void setBackground(Color c) {
-	Logger.log("GComponentPeer setBackground", c);
+	Logger.log("GComponentPeer", name, "setBackground", c);
     }
 
     @Override
     public synchronized void setFont(Font f) {
-	Logger.log("GComponentPeer setFont", f);
+	Logger.log("GComponentPeer", name, "setFont", f);
     }
 
     @Override
     public void updateCursorImmediately() {
-	Logger.log("GComponentPeer updateCursorImmediately");
+	Logger.log("GComponentPeer", name, "updateCursorImmediately");
     }
 
     @Override
     public boolean requestFocus(Component lightweightChild, boolean temporary, boolean focusedWindowChangeAllowed, long time, Cause cause) {
-	Logger.log("GComponentPeer requestFocus", lightweightChild, temporary, focusedWindowChangeAllowed, cause);
+	Logger.log("GComponentPeer", name, "requestFocus", lightweightChild, temporary, focusedWindowChangeAllowed, cause);
         return false;
     }
 
     @Override
     public boolean isFocusable() {
-	Logger.log("GComponentPeer isFocusable");
+	Logger.log("GComponentPeer", name, "isFocusable");
         return false;
     }
 
     @Override
     public Image createImage(ImageProducer producer) {
-	Logger.log("GComponentPeer createImage", producer);
+	Logger.log("GComponentPeer", name, "createImage", producer);
         return new ToolkitImage(producer);
     }
 
     @Override
     public Image createImage(int width, int height) {
-	Logger.log("GComponentPeer createImage", width, height);
+	Logger.log("GComponentPeer", name, "createImage", width, height);
         return new SunVolatileImage((Component) target, width, height);
     }
 
     @Override
     public VolatileImage createVolatileImage(int width, int height) {
-	Logger.log("GComponentPeer createVolatileImage", width, height);
+	Logger.log("GComponentPeer", name, "createVolatileImage", width, height);
         return new SunVolatileImage((Component) target, width, height);
     }
 
     @Override
     public boolean prepareImage(Image img, int w, int h, ImageObserver o) {
-	Logger.log("GComponentPeer prepareImage", img, w, h, o);
+	Logger.log("GComponentPeer", name, "prepareImage", img, w, h, o);
         return getToolkit().prepareImage(img, w, h, o);
     }
 
     @Override
     public int checkImage(Image img, int w, int h, ImageObserver o) {
-	Logger.log("GComponentPeer checkImage", img, w, h, o);
+	Logger.log("GComponentPeer", name, "checkImage", img, w, h, o);
         return getToolkit().checkImage(img, w, h, o);
     }
 
     @Override
     public GraphicsConfiguration getGraphicsConfiguration() {
-	Logger.log("GComponentPeer getGraphicsConfiguration");
+	Logger.log("GComponentPeer", name, "getGraphicsConfiguration");
         return ((Component) target).getGraphicsConfiguration();
     }
 
     @Override
     public boolean handlesWheelScrolling() {
-	Logger.log("GComponentPeer handlesWheelScrolling");
+	Logger.log("GComponentPeer", name, "handlesWheelScrolling");
         return false;
     }
 
     @Override
     public void createBuffers(int numBuffers, BufferCapabilities caps) throws AWTException {
-	Logger.log("GComponentPeer createBuffers", numBuffers, caps);
+	Logger.log("GComponentPeer", name, "createBuffers", numBuffers, caps);
     }
 
     @Override
     public Image getBackBuffer() {
-	Logger.log("GComponentPeer getBackBuffer");
+	Logger.log("GComponentPeer", name, "getBackBuffer");
         throw new IllegalStateException("Buffers have not been created");
     }
 
     @Override
     public void flip(int x1, int y1, int x2, int y2, FlipContents flipAction) {
-	Logger.log("GComponentPeer flip", x1, y1, x2, y2, flipAction);
+	Logger.log("GComponentPeer", name, "flip", x1, y1, x2, y2, flipAction);
     }
 
     @Override
     public void destroyBuffers() {
-	Logger.log("GComponentPeer destroyBuffers");
+	Logger.log("GComponentPeer", name, "destroyBuffers");
     }
 
     @Override
     public void reparent(ContainerPeer newContainer) {
-	Logger.log("GComponentPeer reparent", newContainer);
+	Logger.log("GComponentPeer", name, "reparent", newContainer);
     }
 
     @Override
     public boolean isReparentSupported() {
-	Logger.log("GComponentPeer isReparentSupported");
+	Logger.log("GComponentPeer", name, "isReparentSupported");
         return false;
     }
 
     @Override
     public void layout() {
-	Logger.log("GComponentPeer layout");
+	Logger.log("GComponentPeer", name, "layout");
     }
 
     @Override
     public void applyShape(Region shape) {
-	Logger.log("GComponentPeer applyShape", shape);
+	Logger.log("GComponentPeer", name, "applyShape", shape);
     }
 
     @Override
     public void setZOrder(ComponentPeer above) {
-	Logger.log("GComponentPeer setZOrder", above);
+	Logger.log("GComponentPeer", name, "setZOrder", above);
     }
 
     @Override
     public boolean updateGraphicsData(GraphicsConfiguration gc) {
-	Logger.log("GComponentPeer updateGraphicsData");
+	Logger.log("GComponentPeer", name, "updateGraphicsData");
         return false;
+    }
+
+    private static void printAccessibleContext(AccessibleContext c, String indent) {
+	if (c == null) {
+		System.out.println("no accessible context");
+		return;
+	}
+
+	String name = c.getAccessibleName();
+	if (name != null) {
+        	System.out.printf("%s[%s] %s:\n", indent, c.getAccessibleRole(), name);
+	} else {
+        	System.out.printf("%s[%s]:\n", indent, c.getAccessibleRole());
+	}
+
+        int n = c.getAccessibleChildrenCount();
+        if (n == 0) {
+            return;
+        }
+
+        indent += "  ";
+
+        for (int i=0; i < n; i++) {
+          printAccessibleContext(c.getAccessibleChild(i).getAccessibleContext(), indent);
+        }
+    }
+
+    private static void printComponent(Component c, String indent) {
+	if (c == null) {
+		return;
+	}
+
+	AccessibleContext cc = c.getAccessibleContext();
+
+	String name = c.getName();
+	String role = "";
+
+	if (cc != null) {
+		role = cc.getAccessibleRole().toString();
+		if (name == null) {
+			name = cc.getAccessibleName();
+		}
+	}
+
+	System.out.printf("%s[%s] %s\n", indent, role, name);
+
+	if (! (c instanceof Container)) {
+		return;
+	}
+
+	Container co = (Container) c;
+
+        int n = co.getComponentCount();
+        if (n == 0) {
+            return;
+        }
+
+        indent += "  ";
+
+        for (int i=0; i < n; i++) {
+          printComponent(co.getComponent(i), indent);
+        }
     }
 }
