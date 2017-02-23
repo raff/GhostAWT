@@ -297,6 +297,10 @@ public class GGraphics2D extends Graphics2D {
     @Override
     public Rectangle getClipBounds() {
 	Logger.log("GGraphics2D getClipBounds", clipBounds);
+	if (clipBounds == null) {
+		clipBounds = new Rectangle(0,0,1,1);
+	}
+
         return clipBounds;
     }
 
