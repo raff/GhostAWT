@@ -40,10 +40,6 @@ public class GhostToolkit extends SunToolkit implements sun.awt.KeyboardFocusMan
 
     public GhostToolkit() {
         /*
-         * Fix for 4701990.
-         * AWTAutoShutdown state must be changed before the toolkit thread
-         * starts to avoid race condition.
-         */
         AWTAutoShutdown.notifyToolkitThreadBusy();
 
         // Find a root TG and attach Appkit thread to it
@@ -67,6 +63,7 @@ public class GhostToolkit extends SunToolkit implements sun.awt.KeyboardFocusMan
         } catch (InterruptedException x) {
             // swallow the exception
         }
+	*/
     }
 
     @Override
