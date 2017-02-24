@@ -1,6 +1,7 @@
 package ghostawt;
 
 import ghostawt.image.GhostGraphicsEnvironment;
+import ghostawt.GhostCallback;
 
 import java.awt.AWTEvent;
 import java.awt.AWTException;
@@ -34,8 +35,6 @@ import sun.awt.CausedFocusEvent.Cause;
 import sun.awt.image.SunVolatileImage;
 import sun.awt.image.ToolkitImage;
 import sun.java2d.pipe.Region;
-
-import javax.accessibility.AccessibleContext;
 
 public class GComponentPeer extends GObjectPeer implements ComponentPeer, DropTargetPeer {
     private String name;
@@ -110,11 +109,10 @@ public class GComponentPeer extends GObjectPeer implements ComponentPeer, DropTa
 	Logger.log("GComponentPeer", name, "handleEvent", e);
 
 	if (e.getID() == WindowEvent.WINDOW_OPENED) {
-		Component c = ((ComponentEvent)e).getComponent();
-
-		printComponent(c, "");
-		// Logger.log("  component", c);
-		// printAccessibleContext(c.getAccessibleContext(), "");
+		if (GhostCallback.instance != null) {
+			Component c = ((ComponentEvent)e).getComponent();
+			GhostCallback.instance.windowOpened(c);
+		}
 	}
     }
 
@@ -299,67 +297,5 @@ public class GComponentPeer extends GObjectPeer implements ComponentPeer, DropTa
     public boolean updateGraphicsData(GraphicsConfiguration gc) {
 	Logger.log("GComponentPeer", name, "updateGraphicsData");
         return false;
-    }
-
-    private static void printAccessibleContext(AccessibleContext c, String indent) {
-	if (c == null) {
-		System.out.println("no accessible context");
-		return;
-	}
-
-	String name = c.getAccessibleName();
-	if (name != null) {
-        	System.out.printf("%s[%s] %s:\n", indent, c.getAccessibleRole(), name);
-	} else {
-        	System.out.printf("%s[%s]:\n", indent, c.getAccessibleRole());
-	}
-
-        int n = c.getAccessibleChildrenCount();
-        if (n == 0) {
-            return;
-        }
-
-        indent += "  ";
-
-        for (int i=0; i < n; i++) {
-          printAccessibleContext(c.getAccessibleChild(i).getAccessibleContext(), indent);
-        }
-    }
-
-    private static void printComponent(Component c, String indent) {
-	if (c == null) {
-		return;
-	}
-
-	AccessibleContext cc = c.getAccessibleContext();
-
-	String name = c.getName();
-	String role = "";
-
-	if (cc != null) {
-		role = cc.getAccessibleRole().toString();
-		if (name == null) {
-			name = cc.getAccessibleName();
-		}
-	}
-
-	System.out.printf("%s[%s] %s\n", indent, role, name);
-
-	if (! (c instanceof Container)) {
-		return;
-	}
-
-	Container co = (Container) c;
-
-        int n = co.getComponentCount();
-        if (n == 0) {
-            return;
-        }
-
-        indent += "  ";
-
-        for (int i=0; i < n; i++) {
-          printComponent(co.getComponent(i), indent);
-        }
     }
 }

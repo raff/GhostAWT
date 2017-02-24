@@ -13,12 +13,17 @@ public abstract class GhostCallback {
         if (value != null) {
             try {
                 Class c = Class.forName(value);
-                instance = c.asSubclass(GhostCallback.class).newInstance();
+		Class<? extends GhostCallback> gc = c.asSubclass(GhostCallback.class);
+		instance = gc.newInstance();
             } catch(ClassNotFoundException e) {
                 System.err.printf("no class for ghostawt.callback=%s", value);
             } catch(ClassCastException e) {
                 System.err.printf("cannot cast %s to ghostawt.GhostCallback", value);
-            }
+            } catch(InstantiationException e) {
+                System.err.printf("cannot create instance of %s", value);
+            } catch(IllegalAccessException e) {
+		System.err.println(e);
+	    }
         }
     }
 }
