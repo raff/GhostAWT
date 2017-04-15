@@ -70,10 +70,15 @@ public class GFontManager extends sun.font.SunFontManager {
             tempFile.deleteOnExit();
 
             InputStream link = (getClass().getResourceAsStream(defaultFont[1]));
-            Files.copy(link, tempFile.getAbsoluteFile().toPath(), StandardCopyOption.REPLACE_EXISTING);
+            long n = Files.copy(link, tempFile.getAbsoluteFile().toPath(), StandardCopyOption.REPLACE_EXISTING);
+	    if (n <= 0) {
+		System.err.printf("copied %d bytes", n);
+		return null;
+	    }
+	    Logger.log("GFontManager.loadDefault - copied %d bytes", n);
             return createFont2D(tempFile, Font.TRUETYPE_FONT, false, null);
         } catch (Exception e) {
-            System.err.println("Could not load arial font");
+            System.err.println("Could not load default font");
             e.printStackTrace();
             return null;
         }

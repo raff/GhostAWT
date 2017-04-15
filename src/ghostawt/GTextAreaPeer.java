@@ -17,10 +17,12 @@ public class GTextAreaPeer extends GTextComponentPeer implements TextAreaPeer {
 
     @Override
     public void insert(String text, int pos) {
+	Logger.log("GTextAreaPeer.insert", pos, text);
     }
 
     @Override
     public void replaceRange(String text, int start, int end) {
+	Logger.log("GTextAreaPeer.replaceRange", start, end, text);
     }
 
     @Override
