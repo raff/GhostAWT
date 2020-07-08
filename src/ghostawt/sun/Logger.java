@@ -23,6 +23,7 @@ class Logger {
 
   public static void logf(String fmt, Object... values) {
     if (verbose) {
+      System.err.print("[ghostawt] ");
       System.err.format(fmt, values);
     }
   }

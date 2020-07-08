@@ -111,6 +111,7 @@ public class GComponentPeer extends GObjectPeer implements ComponentPeer, DropTa
 	if (e.getID() == WindowEvent.WINDOW_OPENED) {
 		if (GhostCallback.instance != null) {
 			Component c = ((ComponentEvent)e).getComponent();
+	                Logger.log("GhostCallback.windowOpened", c);
 			GhostCallback.instance.windowOpened(c);
 		}
 	}
